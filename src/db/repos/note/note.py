@@ -138,6 +138,31 @@ class NotePostgreRepo(NoteRepoABC):
                 note_id, permission.role_id
             )
         return note
+    
+    async def update(self, note):
+        raise NotImplementedError("Not implemented yet")
+    
+    async def delete(self, note):
+        raise NotImplementedError("Not implemented yet")
+    
+    async def select(self, note: NoteEntity) -> NoteEntity:
+        assert note.note_id
+        query = f"""
+        WITH filtered_note AS (
+            SELECT * FROM {self.content_table}
+            WHERE id = $1
+        )
+
+        SELECT * FROM filtered_note fn
+        JOIN {self.embedding_table} ON {self.embedding_table}.note_id = fn.id
+        JOIN {self.permission_table} ON {self.permission_table}.note_id = fn.id
+        """
+
+        return await self._db.fetch(
+            query,
+            note.note_id
+        )
+    
 
 
 
