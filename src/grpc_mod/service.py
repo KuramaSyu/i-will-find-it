@@ -2,7 +2,8 @@ from grpc.aio import ServicerContext
 
 from db.repos import NoteRepoABC
 from db.entities import NoteEntity
-from grpc.generated import PostNoteRequest, GetNoteRequest, NoteServiceServicer, Note
+from grpc_mod.proto.note_pb2 import GetNoteRequest, PostNoteRequest, Note
+from grpc_mod.proto.note_pb2_grpc import NoteService, NoteServiceServicer
 
 
 class GRPCNoteService(NoteServiceServicer):

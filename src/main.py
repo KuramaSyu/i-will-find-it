@@ -1,13 +1,13 @@
 import asyncio
 import grpc
-from .grpc.generated import NoteServiceServicer, add_NoteServiceServicer_to_server
-from .grpc.service import GRPCNoteService
-from db.repos import NoteRepoABC, AsyncNoteRepo  # your repo implementation
+from grpc_mod.proto.note_pb2_grpc import add_NoteServiceServicer_to_server
+from grpc_mod.service import GRPCNoteService
+from db.repos import NoteRepoABC, NotePostgreRepo
 
 
 async def serve():
     # 1. Initialize your repository (async DB layer)
-    repo: NoteRepoABC = AsyncNoteRepo()  # replace with your actual async repo implementation
+    repo: NoteRepoABC = NotePostgreRepo()  # replace with your actual async repo implementation
 
     # 2. Create your gRPC server
     server = grpc.aio.server()

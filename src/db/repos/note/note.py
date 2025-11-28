@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from entities import NoteEntity
+from db.entities import NoteEntity
 
 from db.database import Database
 

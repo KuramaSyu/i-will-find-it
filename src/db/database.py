@@ -10,11 +10,13 @@ def aquire(coroutine: Callable):
     Wrapper for a coroutine which injects
     an aquired connection as first parameter
     """
-    # aquire pool from DatabaseConnection
-    pool = Database.get_instance().pool
+   
 
     @functools.wraps(coroutine)
     async def wrapper(self: "Database", *coro_args, _cxn: Connection, **coro_kwargs):
+         # aquire pool from DatabaseConnection
+        pool = Database.get_instance().pool
+
         async with pool.acquire() as connection:
             # aquired connection
             async with connection.transaction():

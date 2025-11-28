@@ -1,20 +1,20 @@
 from abc import ABC, abstractmethod
 from typing import List
-from entities import NoteEmbeddingEntity
+from db.entities import NoteEmbeddingEntity
 
 class NoteEmbeddingRepo(ABC):
 
     @abstractmethod
     async def insert(
         self,
-        metadata: NoteEmbeddingEntity,
+        embedding: NoteEmbeddingEntity,
     ) -> NoteEmbeddingEntity:
-        """inserts metadata
+        """inserts embedding
         
         Args:
         -----
-        metadata: `NoteEmbeddingEntity`
-            the metadata of a note
+        embedding: `NoteEmbeddingEntity`
+            the embedding of a note
 
         Returns:
         --------
@@ -26,14 +26,14 @@ class NoteEmbeddingRepo(ABC):
     @abstractmethod
     async def update(
         self,
-        metadata: NoteEmbeddingEntity,
+        embedding: NoteEmbeddingEntity,
     ) -> NoteEmbeddingEntity:
-        """updates metadata
+        """updates embedding
         
         Args:
         -----
-        metadata: `NoteEmbeddingEntity`
-            the metadata of a note
+        embedding: `NoteEmbeddingEntity`
+            the embedding of a note
 
         Returns:
         --------
@@ -45,14 +45,14 @@ class NoteEmbeddingRepo(ABC):
     @abstractmethod
     async def delete(
         self,
-        metadata: NoteEmbeddingEntity,
+        embedding: NoteEmbeddingEntity,
     ) -> NoteEmbeddingEntity:
-        """delete metadata
+        """delete embedding
         
         Args:
         -----
-        metadata: `NoteEmbeddingEntity`
-            the metadata of a note
+        embedding: `NoteEmbeddingEntity`
+            the embedding of a note
 
         Returns:
         --------
@@ -64,14 +64,14 @@ class NoteEmbeddingRepo(ABC):
     @abstractmethod
     async def select(
         self,
-        metadata: NoteEmbeddingEntity,
+        embedding: NoteEmbeddingEntity,
     ) -> List[NoteEmbeddingEntity]:
         """select embeddings
         
         Args:
         -----
-        metadata: `NoteEmbeddingEntity`
-            the metadata of a note
+        embedding: `NoteEmbeddingEntity`
+            the embedding of a note
 
         Returns:
         --------
