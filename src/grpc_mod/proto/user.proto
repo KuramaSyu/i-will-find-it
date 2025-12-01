@@ -1,0 +1,54 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+package note;
+
+// User Messages
+message User {
+    int32 id = 1;
+    int64 discord_id = 2;
+    google.protobuf.StringValue avatar_url = 3;
+}
+
+message GetUserRequest {
+    int32 id = 1;
+}
+
+message PostUserRequest {
+    int64 discord_id = 1;
+    google.protobuf.StringValue avatar_url = 2;
+}
+
+message AlterUserRequest {
+    int32 id = 1;
+    google.protobuf.Int64Value discord_id = 2;
+    google.protobuf.StringValue avatar_url = 3;
+}
+
+message DeleteUserRequest {
+    int32 id = 1;
+}
+
+message DeleteUserResponse {
+    bool success = 1;
+}
+
+// Request for getting a user by id
+message GetUserRequest {
+    int32 id = 1;
+}
+
+// User Service
+service UserService {
+    rpc GetUser(GetUserRequest) returns (User);
+    rpc PostUser(PostUserRequest) returns (User);
+    rpc AlterUser(AlterUserRequest) returns (User);
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}
+
+// Note Service
+service NoteService {
+    rpc GetNote(GetNoteRequest) returns (Note);
+    rpc PostNote(PostNoteRequest) returns (Note);
+}
