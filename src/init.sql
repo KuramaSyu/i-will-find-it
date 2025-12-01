@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    discord_id BIGINT,
+    discord_id BIGINT UNIQUE,
     avatar_url TEXT
 );
 
