@@ -110,10 +110,10 @@ class NotePostgreRepo(NoteRepoABC):
         VALUES ($1, $2, $3, $4)
         RETURNING id
         """
-        note_id: int = await self._db.fetch(
+        note_id: int = (await self._db.fetch(
             query, 
             note.title, note.content, note.updated_at, note.author_id
-        )[0] 
+        ))[0] 
 
         # insert embeddings
         query = f"""
