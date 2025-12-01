@@ -2,7 +2,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
-package note;
+package user;
 
 // User Messages
 message User {
@@ -34,21 +34,10 @@ message DeleteUserResponse {
     bool success = 1;
 }
 
-// Request for getting a user by id
-message GetUserRequest {
-    int32 id = 1;
-}
-
 // User Service
 service UserService {
     rpc GetUser(GetUserRequest) returns (User);
     rpc PostUser(PostUserRequest) returns (User);
     rpc AlterUser(AlterUserRequest) returns (User);
     rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
-}
-
-// Note Service
-service NoteService {
-    rpc GetNote(GetNoteRequest) returns (Note);
-    rpc PostNote(PostNoteRequest) returns (Note);
 }
