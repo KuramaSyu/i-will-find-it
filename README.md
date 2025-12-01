@@ -1,5 +1,9 @@
 # i-will-find-it
 
+# Todo
+- UserRepo
+- gRPC user service
+
 # Development Docs
 ### Compile Protobufs (`.proto` files):
 1. install requirements:
