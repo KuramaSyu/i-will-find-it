@@ -4,9 +4,16 @@ from grpc.aio import ServicerContext
 
 from db.repos import NoteRepoABC
 from db.entities import NoteEntity
-from grpc_mod.proto.note_pb2 import GetNoteRequest, NoteEmbedding, NotePermission, PostNoteRequest, Note
-from grpc_mod.proto.note_pb2_grpc import NoteService, NoteServiceServicer
+from grpc_mod import (
+    GetNoteRequest, NoteEmbedding, 
+    NotePermission, PostNoteRequest, Note,
+    NoteService, NoteServiceServicer,
+    UserServiceServicer, GetUserRequest, User, 
+    AlterUserRequest, DeleteUserRequest, 
+    DeleteUserResponse, PostUserRequest
+)
 from grpc_mod.converter import to_grpc_note
+from db.repos.user.user import UserRepositoryABC
 
 
 class GRPCNoteService(NoteServiceServicer):
@@ -66,3 +73,23 @@ class GRPCNoteService(NoteServiceServicer):
             )
         )
         return to_grpc_note(note_entity)
+
+class GRPCUserService(UserServiceServicer):
+    """
+    Implements the gRPC service defined in grpc/proto/user.proto
+    """
+
+    def __init__(self, user_repo: UserRepositoryABC):
+        self.repo = user_repo
+
+    async def GetUser(self, request: GetUserRequest, context: ServicerContext) -> User:
+        ...
+
+    async def AlterUser(self, request: AlterUserRequest, context: ServicerContext) -> User:
+        ...
+    
+    async def DeleteUser(self, request: DeleteUserRequest, context: ServicerContext) -> DeleteUserResponse:
+        ...
+    
+    async def PostUser(self, request: PostUserRequest, context: ServicerContext) -> User:
+        ...
