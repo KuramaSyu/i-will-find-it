@@ -13,9 +13,8 @@ from grpc_mod import (
     AlterUserRequest, DeleteUserRequest, 
     DeleteUserResponse, PostUserRequest
 )
-from grpc_mod.converter import to_grpc_note
-from db.repos.user.user import UserRepoABC
-from src.grpc_mod.converter.user_entity_converter import to_grpc_user
+from grpc_mod.converter import to_grpc_note, to_grpc_user
+from db import UserRepoABC, UserEntity
 
 
 class GRPCNoteService(NoteServiceServicer):
@@ -36,7 +35,8 @@ class GRPCNoteService(NoteServiceServicer):
             title=None,
             updated_at=None
         ))
-        assert (note_entity.note_id 
+        assert (note_entity 
+            and note_entity.note_id 
             and note_entity.author_id 
             and note_entity.content 
             and note_entity.title
@@ -111,4 +111,15 @@ class GRPCUserService(UserServiceServicer):
         ...
     
     async def PostUser(self, request: PostUserRequest, context: ServicerContext) -> User:
-        ...
+        if not request.HasField("discord_id") or not request.HasField("avatar_url"):
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("'discord_id' and 'avatar_url' must be provided")
+            return User()
+        user_entity = await self.repo.insert(
+            UserEntity(
+                id=None,
+                discord_id=request.discord_id,
+                avatar_url=request.avatar_url,
+            )
+        )
+        return to_grpc_user(user_entity)
