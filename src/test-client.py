@@ -1,6 +1,5 @@
 import grpc
-from grpc_mod import NoteService, GetNoteRequest, PostNoteRequest, NoteServiceStub
-from google.protobuf.wrappers_pb2 import Int32Value, StringValue
+from grpc_mod import NoteService, GetNoteRequest, PostNoteRequest, NoteServiceStub, PostUserRequest, UserServiceStub, GetUserRequest, User
 
 def get_note(stub, note_id):
     request = GetNoteRequest(id=note_id)
@@ -9,11 +8,28 @@ def get_note(stub, note_id):
     print(response)
     return response
 
-def post_note(stub, note_id=None, title=None, content=None, author_id=1):
+def get_user(stub, user_id, discord_id) -> User:
+    request = GetUserRequest(id=user_id, discord_id=discord_id)
+    response = stub.GetUser(request)
+    print("GetUser response:")
+    print(response)
+    return response
+
+def post_user(stub, discord_id: int, avatar_url: str):
+    request = PostUserRequest(
+        discord_id=discord_id,
+        avatar_url=avatar_url,
+    )
+
+    response = stub.PostUser(request)
+    print("PostUser response:")
+    print(response)
+    return response
+
+def post_note(stub, title: str, content: str, author_id: int = 1):
     request = PostNoteRequest(
-        id=Int32Value(value=note_id) if note_id is not None else None,
-        title=StringValue(value=title) if title is not None else None,
-        content=StringValue(value=content) if content is not None else None,
+        title=title,
+        content=content,
         author_id=author_id,
     )
 
@@ -27,16 +43,28 @@ def main():
     channel = grpc.insecure_channel("localhost:50051")
     stub = NoteServiceStub(channel)
 
+    # generate user
+    print("Posting user...")
+    try: 
+        user_response = post_user(
+            UserServiceStub(channel),
+            discord_id=987654321,
+            avatar_url="http://example.com/avatar.png"
+        )
+    except Exception as e:
+        print(f"User posting failed: {e}")
+
+    user = get_user(UserServiceStub(channel), user_id=None, discord_id=987654321)
     # Test: create/update note
-    print("Posting note...")
-    post_note(
+    print(f"Posting note for user with id {user.id}...")
+    resp = post_note(
         stub,
-        note_id=None,           # None → create new
         title="Hello World",
         content="This is a test note",
-        author_id=123
+        author_id=user.id
     )
-
+    print(f"Posted note, got: {resp}")
+    
     # Test: fetch note
     print("\nFetching note...")
     get_note(stub, note_id=1)
