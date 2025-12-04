@@ -13,7 +13,7 @@ services:
       - ./data:/var/lib/postgresql
 
   pgweb:
-    container_name: pgweb
+    container_name: pgweb_helper
     restart: always
     image: sosedoff/pgweb
     ports: 
