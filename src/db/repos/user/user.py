@@ -46,7 +46,7 @@ class UserPostgresRepo(UserRepoABC):
         """Insert a new user and return the created entity with ID."""
         query = "INSERT INTO users (discord_id, avatar_url) VALUES ($1, $2) RETURNING id"
         user_id = await self.db.fetchrow(query, user.discord_id, user.avatar_url)
-        user.id = user_id
+        user.id = user_id["id"]
         return user
 
     async def update(self, user: UserEntity) -> UserEntity:
