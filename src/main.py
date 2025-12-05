@@ -8,11 +8,16 @@ import grpc
 from colorama import Fore, Style, init
 
 
-from db.repos import NoteRepoFacadeABC, NotePostgreRepoFacade
+from db import table
+from db.repos import NoteRepoFacadeABC, NoteRepoFacade
 from db import Database
+from db.repos.note import embedding
+from db.repos.note.permission import NotePermissionPostgresRepo
 from db.repos.user.user import UserRepoABC, UserPostgresRepo
+from db.table import Table, setup_table_logging
 from grpc_mod.proto.user_pb2_grpc import add_UserServiceServicer_to_server
 from grpc_mod import add_NoteServiceServicer_to_server, GrpcNoteService, GrpcUserService
+from db.repos.note.content import NoteContentPostgresRepo
 
 
 def logging_provider(file: str, cls_instance: Optional[object] = None) -> logging.Logger:
@@ -84,6 +89,7 @@ def logging_provider(file: str, cls_instance: Optional[object] = None) -> loggin
 
 async def serve():
     log = logging_provider(__name__)
+    setup_table_logging(logging_provider)
 
     # create server 
     server = grpc.aio.server()
@@ -92,8 +98,21 @@ async def serve():
     db = Database(dsn="postgres://postgres:postgres@localhost:5433/db?sslmode=disable")
     await db.init_db()
 
+    # db tables
+    common_table_kwargs = {
+        "db": db,
+        "logging_provider": logging_provider,
+    }
+    content_table = Table("note.content", **common_table_kwargs, id_fields=["id"])
+    permission_table = Table("note.permission", **common_table_kwargs, id_fields=["note_id", "role_id"])
+    embedding_table = Table("note.embedding", **common_table_kwargs,id_fields=["note_id", "model"])   
     # note service
-    repo: NotePostgreRepoFacade = NotePostgreRepoFacade(db=db)
+    repo: NoteRepoFacade = NoteRepoFacade(
+        db=db,
+        content_repo=NoteContentPostgresRepo(content_table),
+        embedding_repo=embedding.NoteEmbeddingPostgresRepo(embedding_table),
+        permission_repo=NotePermissionPostgresRepo(permission_table),
+    )
     note_service = GrpcNoteService(repo=repo, log=logging_provider)
     add_NoteServiceServicer_to_server(note_service, server)
 
