@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Self
 
 from asyncpg import Record
+from db.database import Database, DatabaseABC
 from db.entities import NoteEntity
 from db import TableABC
 
@@ -11,7 +12,7 @@ class NoteSearchStrategy(ABC):
 
     def __init__(
         self,
-        db: TableABC[List[Record]],
+        db: DatabaseABC,
         query: str,
         limit: int,
         offset: int
@@ -81,7 +82,7 @@ class DateNoteSearchStrategy(NoteSearchStrategy):
     async def search(self) -> list["NoteEntity"]:
         query = f"""
         SELECT note_id, title, author_id, content, updated_at
-        FROM {self.db.name}
+        FROM note.content
         ORDER BY updated_at DESC
         LIMIT {self.limit}
         OFFSET {self.offset};
@@ -97,7 +98,7 @@ class TitleLexemeNoteSearchStrategy(NoteSearchStrategy):
     async def search(self) -> list["NoteEntity"]:
         query = f"""
         SELECT note_id, title, author_id, content, updated_at
-        FROM {self.db.name}
+        FROM note.content
         WHERE to_tsvector('english', title) @@ to_tsquery('english', $1)
         ORDER BY ts_rank(to_tsvector('english', title), to_tsquery('english', $1)) DESC
         LIMIT {self.limit}
