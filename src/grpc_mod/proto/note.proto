@@ -10,6 +10,7 @@ message GetNoteRequest {
 
 message GetSearchNotesRequest {
     enum SearchType {
+        Undefined = 0;      // default
         NoSearch = 1;       // just
         FullTextTitle = 2;  // exact match search
         Fuzzy = 3;          // typo tolerant search
