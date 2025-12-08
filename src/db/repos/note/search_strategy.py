@@ -1,0 +1,143 @@
+from abc import ABC, abstractmethod
+from typing import List, Self
+
+from asyncpg import Record
+from db.entities import NoteEntity
+from db import TableABC
+
+
+class NoteSearchStrategy(ABC):
+    """Represents a strategy for searching notes."""
+
+    def __init__(
+        self,
+        db: TableABC[List[Record]],
+        query: str,
+        limit: int,
+        offset: int
+    ) -> None:
+        self.db = db
+        self.query = query
+        self.limit = limit
+        self.offset = offset
+
+
+    def set_query(self, query: str) -> Self:
+        """Sets the search query.
+
+        Args:
+        -----
+        query: `str`
+            The search query.
+        """
+        self.query = query
+        return self
+
+    def set_limit(self, limit: int) -> Self:
+        """Sets the maximum number of results to return.
+
+        Args:
+        -----
+        limit: `int`
+            The maximum number of results.
+        """
+        self.limit = limit
+        return self
+    
+    def set_offset(self, offset: int) -> Self:
+        """Sets the number of results to skip.
+
+        Args:
+        -----
+        offset: `int`
+            The number of results to skip.
+        """
+        self.offset = offset
+        return self
+    
+    @abstractmethod
+    async def search(self) -> list["NoteEntity"]:
+        """Searches for notes based on the provided query.
+
+        Args:
+        -----
+        query: `str`
+            The search query.
+        limit: `int`
+            The maximum number of results to return.
+        offset: `int`
+            The number of results to skip.
+
+        Returns:
+        --------
+        `list[NoteEntity]`:
+            A list of notes matching the search criteria.
+        """
+        ...
+
+class DateNoteSearchStrategy(NoteSearchStrategy):
+    """Return notes sorted by date (most recent first)."""
+    
+    async def search(self) -> list["NoteEntity"]:
+        query = f"""
+        SELECT note_id, title, author_id, content, updated_at
+        FROM {self.db.name}
+        ORDER BY updated_at DESC
+        LIMIT {self.limit}
+        OFFSET {self.offset};
+        """
+        records = await self.db.fetch(query)
+        if not records:
+            raise RuntimeError("Failed to fetch notes sorted by date.")
+        return [NoteEntity.from_record(record) for record in records]
+
+class TitleLexemeNoteSearchStrategy(NoteSearchStrategy):
+    """Return notes where the title is matched by lexemes in the query"""
+    
+    async def search(self) -> list["NoteEntity"]:
+        query = f"""
+        SELECT note_id, title, author_id, content, updated_at
+        FROM {self.db.name}
+        WHERE to_tsvector('english', title) @@ to_tsquery('english', $1)
+        ORDER BY ts_rank(to_tsvector('english', title), to_tsquery('english', $1)) DESC
+        LIMIT {self.limit}
+        OFFSET {self.offset};
+        """
+        records = await self.db.fetch(query, self.query)
+        if not records:
+            raise RuntimeError("Failed to fetch notes by exact title.")
+        return [NoteEntity.from_record(record) for record in records]
+    
+class FuzzyTitleContentSearchStrategy(NoteSearchStrategy):
+    """Return notes where the title or content is similar to the query"""
+    
+    async def search(self) -> list["NoteEntity"]:
+        query = f"""
+        SELECT note_id, title, author_id, content, updated_at
+        FROM {self.db.name}
+        ORDER BY similarity(title || ' ' || content, $1) DESC
+        LIMIT {self.limit}
+        OFFSET {self.offset};
+        """
+        records = await self.db.fetch(query, self.query)
+        if not records:
+            raise RuntimeError("Failed to fetch notes by fuzzy title/content.")
+        return [NoteEntity.from_record(record) for record in records]
+
+
+class ContextNoteSearchStrategy(NoteSearchStrategy):
+    """Return notes based on semantic search using embeddings."""
+    
+    async def search(self) -> list["NoteEntity"]:
+        query = f"""
+        SELECT note_id, title, author_id, content, updated_at, (embedding <=> $1::vector) AS similarity
+        FROM note.embedding
+        JOIN note.content on note.content.id = note.embedding.note_id
+        ORDER BY similarity ASC
+        LIMIT {self.limit}
+        OFFSET {self.offset}
+        """
+        records = await self.db.fetch(query, self.query)
+        if not records:
+            raise RuntimeError("Failed to fetch notes by context.")
+        return [NoteEntity.from_record(record) for record in records]
