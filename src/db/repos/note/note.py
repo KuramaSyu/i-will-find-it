@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, Optional, Type
+import typing
 
 import asyncpg
 
+from ai.embedding_generator import EmbeddingGenerator, Models
 from db.entities import NoteEntity
 from db import Database
 from db.entities.note.embedding import NoteEmbeddingEntity
@@ -15,7 +17,6 @@ from db.table import TableABC
 from api.undefined import UNDEFINED
 from db.entities.note.permission import NotePermissionEntity
 from db.repos.note.embedding import NoteEmbeddingRepo
-from grpc_mod.proto.note_pb2 import GetSearchNotesRequest, MinimalNote
 
 
 class SearchType(Enum):
@@ -24,20 +25,7 @@ class SearchType(Enum):
     FUZZY = 3
     CONTEXT = 4
 
-    @staticmethod
-    def from_proto(proto_value: GetSearchNotesRequest.SearchType.ValueType) -> "SearchType":
-        if proto_value == GetSearchNotesRequest.SearchType.Undefined:
-            return SearchType.CONTEXT
-        elif proto_value == GetSearchNotesRequest.SearchType.NoSearch:
-            return SearchType.NO_SEARCH
-        elif proto_value == GetSearchNotesRequest.SearchType.FullTextTitle:
-            return SearchType.FULL_TEXT_TITLE
-        elif proto_value == GetSearchNotesRequest.SearchType.Fuzzy:
-            return SearchType.FUZZY
-        elif proto_value == GetSearchNotesRequest.SearchType.Context:
-            return SearchType.CONTEXT
-        else:
-            raise ValueError(f"Unknown SearchType value: {proto_value}")
+
 
 class NoteRepoFacadeABC(ABC):
     """Represents the ABC for note-operations which operate over multiple relations"""
@@ -140,7 +128,7 @@ class NoteRepoFacadeABC(ABC):
         query: str, 
         limit: int, 
         offset: int
-    ) -> List[MinimalNote]:
+    ) -> List[NoteEntity]:
         """search notes according to the search type
         
         Args:
@@ -189,19 +177,31 @@ class NoteRepoFacade(NoteRepoFacadeABC):
             query, 
             note.title, note.content, note.updated_at, note.author_id
         ))["id"] 
+        print(f"Inserted note with ID: {note_id}")
 
         # insert embeddings
+        assert note.embeddings == []
         query = f"""
-        INSERT INTO {self.embedding_table_name}(model, embedding)
-        VALUES ($1, $2)
+        INSERT INTO {self.embedding_table_name}(note_id, model, embedding)
+        VALUES ($1, $2, $3)
         """
-        for embedding in note.embeddings:
-            embedding.note_id = note_id
+        if note.content:
+            model = Models.MINI_LM_L6_V2
+            embedding = EmbeddingGenerator(model).generate(note.content)
+            embedding_str = EmbeddingGenerator.tensor_to_str_vec(embedding)
             await self._db.execute(
                 query,
-                note_id, embedding
+                note_id, model.value, embedding_str
             )
-        
+            note.embeddings.append(
+                NoteEmbeddingEntity(
+                    note_id=note_id,
+                    model=model.value,
+                    embedding=embedding.tolist()
+                )
+            )
+
+            
         # insert permissions
         query = f"""
         INSERT INTO {self.permission_table_name}(note_id, role_id)
@@ -254,7 +254,7 @@ class NoteRepoFacade(NoteRepoFacadeABC):
         query: str, 
         limit: int, 
         offset: int
-    ) -> List[MinimalNote]:
+    ) -> List[NoteEntity]:
         strategy_type: Type[NoteSearchStrategy]
         if search_type == SearchType.NO_SEARCH:
             strategy_type = ContextNoteSearchStrategy
@@ -273,7 +273,7 @@ class NoteRepoFacade(NoteRepoFacadeABC):
             offset=offset
         )
         note_entities = await strategy.search()
-        notes = [NoteEntity.from_record(record) for record in note_entities]
+        return note_entities
 
 
 
