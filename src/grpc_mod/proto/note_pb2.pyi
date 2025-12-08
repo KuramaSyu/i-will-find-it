@@ -7,6 +7,7 @@ import builtins
 import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
+import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
 import google.protobuf.timestamp_pb2
 import sys
@@ -35,6 +36,92 @@ class GetNoteRequest(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["id", b"id"]) -> None: ...
 
 Global___GetNoteRequest: typing_extensions.TypeAlias = GetNoteRequest
+
+@typing.final
+class GetSearchNotesRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    class _SearchType:
+        ValueType = typing.NewType("ValueType", builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+
+    class _SearchTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[GetSearchNotesRequest._SearchType.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Undefined: GetSearchNotesRequest._SearchType.ValueType  # 0
+        """default"""
+        NoSearch: GetSearchNotesRequest._SearchType.ValueType  # 1
+        """just"""
+        FullTextTitle: GetSearchNotesRequest._SearchType.ValueType  # 2
+        """exact match search"""
+        Fuzzy: GetSearchNotesRequest._SearchType.ValueType  # 3
+        """typo tolerant search"""
+        Context: GetSearchNotesRequest._SearchType.ValueType  # 4
+        """semantic search using embeddings"""
+
+    class SearchType(_SearchType, metaclass=_SearchTypeEnumTypeWrapper): ...
+    Undefined: GetSearchNotesRequest.SearchType.ValueType  # 0
+    """default"""
+    NoSearch: GetSearchNotesRequest.SearchType.ValueType  # 1
+    """just"""
+    FullTextTitle: GetSearchNotesRequest.SearchType.ValueType  # 2
+    """exact match search"""
+    Fuzzy: GetSearchNotesRequest.SearchType.ValueType  # 3
+    """typo tolerant search"""
+    Context: GetSearchNotesRequest.SearchType.ValueType  # 4
+    """semantic search using embeddings"""
+
+    SEARCH_TYPE_FIELD_NUMBER: builtins.int
+    QUERY_FIELD_NUMBER: builtins.int
+    LIMIT_FIELD_NUMBER: builtins.int
+    OFFSET_FIELD_NUMBER: builtins.int
+    search_type: Global___GetSearchNotesRequest.SearchType.ValueType
+    """Search parameters"""
+    query: builtins.str
+    limit: builtins.int
+    """Pagination"""
+    offset: builtins.int
+    def __init__(
+        self,
+        *,
+        search_type: Global___GetSearchNotesRequest.SearchType.ValueType = ...,
+        query: builtins.str = ...,
+        limit: builtins.int = ...,
+        offset: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["limit", b"limit", "offset", b"offset", "query", b"query", "search_type", b"search_type"]) -> None: ...
+
+Global___GetSearchNotesRequest: typing_extensions.TypeAlias = GetSearchNotesRequest
+
+@typing.final
+class MinimalNote(google.protobuf.message.Message):
+    """Response: represents a minimal Note for search results"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    ID_FIELD_NUMBER: builtins.int
+    TITLE_FIELD_NUMBER: builtins.int
+    AUTHOR_ID_FIELD_NUMBER: builtins.int
+    UPDATED_AT_FIELD_NUMBER: builtins.int
+    STRIPPED_CONTENT_FIELD_NUMBER: builtins.int
+    id: builtins.int
+    title: builtins.str
+    author_id: builtins.int
+    stripped_content: builtins.str
+    @property
+    def updated_at(self) -> google.protobuf.timestamp_pb2.Timestamp: ...
+    def __init__(
+        self,
+        *,
+        id: builtins.int = ...,
+        title: builtins.str = ...,
+        author_id: builtins.int = ...,
+        updated_at: google.protobuf.timestamp_pb2.Timestamp | None = ...,
+        stripped_content: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["updated_at", b"updated_at"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["author_id", b"author_id", "id", b"id", "stripped_content", b"stripped_content", "title", b"title", "updated_at", b"updated_at"]) -> None: ...
+
+Global___MinimalNote: typing_extensions.TypeAlias = MinimalNote
 
 @typing.final
 class Note(google.protobuf.message.Message):
