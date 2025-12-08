@@ -1,8 +1,8 @@
 # i-will-find-it
 
 # Todo
-- UserRepo
-- gRPC user service
+- better logging, more di
+- don't regenerate embedding generator too often 
 
 # Development Docs
 ### Compile Protobufs (`.proto` files):
