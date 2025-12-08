@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 
 from asyncpg import Record
@@ -20,7 +20,7 @@ class NoteEntity:
     permissions: List[NotePermissionEntity]
 
     @staticmethod
-    def from_record(record: Record) -> "NoteEntity":
+    def from_record(record: Record | Dict[str, Any]) -> "NoteEntity":
         return NoteEntity(
             note_id=record.get("id", UNDEFINED),
             title=record.get("title", UNDEFINED),
