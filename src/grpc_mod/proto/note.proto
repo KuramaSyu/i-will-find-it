@@ -8,6 +8,31 @@ message GetNoteRequest {
     int32 id = 1;
 }
 
+message GetSearchNotesRequest {
+    enum SearchType {
+        NoSearch = 1;       // just
+        FullTextTitle = 2;  // exact match search
+        Fuzzy = 3;          // typo tolerant search
+        Context = 4;        // semantic search using embeddings
+    }
+    // Search parameters
+    SearchType search_type = 1;
+    string query = 2;
+
+    // Pagination
+    int32 limit = 3;
+    int32 offset = 4;
+}
+
+// Response: represents a minimal Note for search results
+message MinimalNote {
+    int32 id = 1;
+    string title = 2;
+    int32 author_id = 3;
+    google.protobuf.Timestamp updated_at = 4;
+    string stripped_content = 5;
+}
+
 // Response: represents a Note
 message Note {
     int32 id = 1;
@@ -46,4 +71,5 @@ message AlterNoteRequest {
 service NoteService {
     rpc GetNote(GetNoteRequest) returns (Note);
     rpc PostNote(PostNoteRequest) returns (Note);
+    rpc SearchNotes(GetSearchNotesRequest) returns (stream MinimalNote);
 }
