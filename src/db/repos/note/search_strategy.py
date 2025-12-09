@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Self
 
 from asyncpg import Record
-from ai.embedding_generator import EmbeddingGenerator, Models
+from ai.embedding_generator import EmbeddingGenerator, EmbeddingGeneratorABC, Models
 from db.database import Database, DatabaseABC
 from db.entities import NoteEntity
 from db import TableABC
@@ -133,7 +133,10 @@ class FuzzyTitleContentSearchStrategy(NoteSearchStrategy):
 
 class ContextNoteSearchStrategy(NoteSearchStrategy):
     """Return notes based on semantic search using embeddings."""
-    
+    def __init__(self, db: DatabaseABC, query: str, limit: int, offset: int, generator: EmbeddingGeneratorABC) -> None:
+        super().__init__(db, query, limit, offset)
+        self.generator = generator
+
     async def search(self) -> list["NoteEntity"]:
         model = Models.MINI_LM_L6_V2
         query = f"""
@@ -146,8 +149,8 @@ class ContextNoteSearchStrategy(NoteSearchStrategy):
         LIMIT {self.limit}
         OFFSET {self.offset}
         """
-        query_embedding = EmbeddingGenerator(model).generate(self.query)
-        query_embedding_str = EmbeddingGenerator.tensor_to_str_vec(query_embedding)
+        query_embedding = self.generator.generate(self.query)
+        query_embedding_str = self.generator.tensor_to_str_vec(query_embedding)
         start = datetime.now()
         records = await self.db.fetch(query, query_embedding_str, model.value)
         print(f"Context search records: {records}")
