@@ -6,12 +6,8 @@ import numpy as np
 from typing import List, Any, Sequence
 
 from torch import Tensor
-from api import loggingProvider
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+from api import LoggingProvider
 
-
-test_search = "I hate artificial intelligence"
-search_embedding = model.encode(test_search)
 
 class Models(Enum):
     MINI_LM_L6_V2 = "sentence-transformers/all-MiniLM-L6-v2"
@@ -49,13 +45,26 @@ class EmbeddingGeneratorABC(ABC):
         """
         return f"[{','.join(str(x) for x in tensor.tolist())}]"
 
+    @property
+    @abstractmethod
+    def model_name(self) -> str:
+        """Get the string name of the model."""
+        ...
+
+
 class EmbeddingGenerator(EmbeddingGeneratorABC):
     """Generates embeddings for given text using specified model."""
-    def __init__(self, model_name: Models, loggging_provider: ):
+    def __init__(self, model_name: Models, logging_provider: LoggingProvider):
         self.model = SentenceTransformer(model_name.value)
+        self.model_enum = model_name
+        self.log = logging_provider(__name__, self)
 
     def generate(self, text: str) -> Tensor:
         start = datetime.now()
         embedding = self.model.encode(text)
         print(f"Embedding generation took: {datetime.now() - start}")
         return embedding
+
+    @property
+    def model_name(self) -> str:
+        return self.model_enum.value
