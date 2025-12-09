@@ -4,7 +4,24 @@ from typing import Awaitable, Callable, Coroutine, Dict, Optional, List, Any
 import asyncpg
 from asyncpg import Pool, Connection, Record
 
+from api.types import LoggingProvider
 from utils.singleton import SingletonMeta
+
+
+def strip_args(*args: Any) -> List[Any]:
+    """strips strings or numbers to max 100 chars/values for logging purposes"""
+    stripped = []
+    for arg in args:
+        if isinstance(arg, str):
+            if len(arg) > 100:
+                stripped.append(f"{arg[:100]}... (len={len(arg)})")
+            else:
+                stripped.append(arg)
+        elif isinstance(arg, (int, float, complex)):
+            stripped.append(arg)
+        else:
+            stripped.append(repr(arg))
+    return stripped
 
 def acquire(func: Callable[..., Any]) -> Callable[..., Any]:
     """
@@ -76,18 +93,21 @@ class DatabaseABC(ABC):
     
 class Database(DatabaseABC):
     _instance: Optional["Database"] = None
-    def __init__(self, dsn: str):
+    def __init__(self, dsn: str, log: LoggingProvider):
         self._pool: Optional[Pool] = None
         self._dsn: str = dsn
         self._instance = self
+        self._log = log(__name__, self)
     
     async def init_db(self):
         self._pool = await asyncpg.create_pool(dsn=self._dsn)
+        self._log.info("Database connected")
         
         content = ""
         with open("init.sql") as f:
             content = f.read()
         await self._pool.execute(content)
+        self._log.info("Database initialized with init.sql")
 
     @property
     def pool(self) -> asyncpg.Pool:
@@ -131,6 +151,7 @@ class Database(DatabaseABC):
 
         args: Query arguments.
         """
+        self._log.debug(f"{query} ;; {strip_args(*args)}")
         return await _cxn.execute(query, *args)
 
     
@@ -143,6 +164,7 @@ class Database(DatabaseABC):
         List[Record]:
             the records from the selection/return
         """
+        self._log.debug(f"{query} ;; {strip_args(*args)}")
         return await _cxn.fetch(query, *args)
 
     @acquire
@@ -154,4 +176,5 @@ class Database(DatabaseABC):
         Optional[Record]:
             the record from the selection/return or None
         """
+        self._log.debug(f"{query} ;; {strip_args(*args)}")
         return await _cxn.fetchrow(query, *args)
