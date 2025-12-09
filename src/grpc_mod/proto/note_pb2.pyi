@@ -134,7 +134,6 @@ class Note(google.protobuf.message.Message):
     CONTENT_FIELD_NUMBER: builtins.int
     UPDATED_AT_FIELD_NUMBER: builtins.int
     AUTHOR_ID_FIELD_NUMBER: builtins.int
-    EMBEDDINGS_FIELD_NUMBER: builtins.int
     PERMISSIONS_FIELD_NUMBER: builtins.int
     id: builtins.int
     title: builtins.str
@@ -143,9 +142,9 @@ class Note(google.protobuf.message.Message):
     @property
     def updated_at(self) -> google.protobuf.timestamp_pb2.Timestamp: ...
     @property
-    def embeddings(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[Global___NoteEmbedding]: ...
-    @property
-    def permissions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[Global___NotePermission]: ...
+    def permissions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[Global___NotePermission]:
+        """repeated NoteEmbedding embeddings = 6;"""
+
     def __init__(
         self,
         *,
@@ -154,11 +153,10 @@ class Note(google.protobuf.message.Message):
         content: builtins.str = ...,
         updated_at: google.protobuf.timestamp_pb2.Timestamp | None = ...,
         author_id: builtins.int = ...,
-        embeddings: collections.abc.Iterable[Global___NoteEmbedding] | None = ...,
         permissions: collections.abc.Iterable[Global___NotePermission] | None = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["updated_at", b"updated_at"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["author_id", b"author_id", "content", b"content", "embeddings", b"embeddings", "id", b"id", "permissions", b"permissions", "title", b"title", "updated_at", b"updated_at"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["author_id", b"author_id", "content", b"content", "id", b"id", "permissions", b"permissions", "title", b"title", "updated_at", b"updated_at"]) -> None: ...
 
 Global___Note: typing_extensions.TypeAlias = Note
 

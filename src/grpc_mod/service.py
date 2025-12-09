@@ -64,13 +64,14 @@ class GrpcNoteService(NoteServiceServicer):
                 title=note_entity.title,
                 author_id=note_entity.author_id,
                 content=note_entity.content,
-                embeddings=[
-                    NoteEmbedding(
-                        model=e.model,  # type: ignore
-                        embedding=e.embedding,  # type: ignore
-                    ) for e in note_entity.embeddings
-                    if e.model != UNDEFINED and e.embedding != UNDEFINED
-                ],
+                # embeddings field disabled and reserved in proto file
+                # embeddings=[
+                #     NoteEmbedding(
+                #         model=e.model,  # type: ignore
+                #         embedding=e.embedding,  # type: ignore
+                #     ) for e in note_entity.embeddings
+                #     if e.model != UNDEFINED and e.embedding != UNDEFINED
+                # ],
                 permissions=[
                     NotePermission(
                         role_id=p.role_id  # type: ignore
