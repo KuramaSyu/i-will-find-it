@@ -36,12 +36,13 @@ message MinimalNote {
 
 // Response: represents a Note
 message Note {
+    reserved 6;
     int32 id = 1;
     string title = 2;
     string content = 3;
     google.protobuf.Timestamp updated_at = 4;
     int32 author_id = 5;
-    repeated NoteEmbedding embeddings = 6;
+    //repeated NoteEmbedding embeddings = 6;
     repeated NotePermission permissions = 7;
 }
 
