@@ -36,10 +36,11 @@ def to_grpc_note(note_entity: NoteEntity) -> Note:
     return Note(
         **basic_args,
         updated_at=updated_at_ts,
-        embeddings=[
-            NoteEmbedding(model=e.model, embedding=e.embedding)  # type: ignore 
-            for e in note_entity.embeddings
-        ],
+        # embeddings disabled and reserved in proto file
+        # embeddings=[
+        #     NoteEmbedding(model=e.model, embedding=e.embedding)  # type: ignore 
+        #     for e in note_entity.embeddings
+        # ],
         permissions=[
             NotePermission(role_id=p.role_id) for p in note_entity.permissions
         ],
