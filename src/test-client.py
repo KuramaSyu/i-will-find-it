@@ -23,7 +23,6 @@ async def get_note(stub: NoteServiceStub, note_id: int):
         print(f"Error getting note: {e}")
         return None
 
-
 async def search_note(stub: NoteServiceStub, query: str):
     request = GetSearchNotesRequest(
         query=query, search_type=GetSearchNotesRequest.SearchType.Context, limit=50
@@ -96,8 +95,6 @@ async def main():
             discord_id=987654321,
             avatar_url="http://example.com/avatar.png",
         )
-        if not user_response:
-            return
 
         user = await get_user(user_stub, user_id=None, discord_id=987654321)
         if not user:
