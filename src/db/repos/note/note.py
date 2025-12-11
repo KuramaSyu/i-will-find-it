@@ -73,12 +73,12 @@ class NoteRepoFacadeABC(ABC):
         
         Args:
         -----
-        note: `NoteMetadataEntity`
-            the note of a note
+        note: `NoteEntity`
+            the note
 
         Returns:
         --------
-        `NoteMetadataEntity`:
+        `NoteEntity`:
             the updated entity
         """
         ...
@@ -204,8 +204,20 @@ class NoteRepoFacade(NoteRepoFacadeABC):
         note.note_id = note_id
         return note
     
-    async def update(self, note):
-        raise NotImplementedError("Not implemented yet")
+    async def update(self, note: NoteEntity) -> NoteEntity:
+        return await self._content_repo.update(
+            set=note,
+            where=NoteEntity(
+                note_id=note.note_id,
+                author_id=UNDEFINED,
+                content=UNDEFINED,
+                embeddings=UNDEFINED,
+                permissions=UNDEFINED,
+                title=UNDEFINED,
+                updated_at=UNDEFINED
+            )
+        )
+        
     
     async def delete(self, note):
         raise NotImplementedError("Not implemented yet")
