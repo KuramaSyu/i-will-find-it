@@ -31,3 +31,10 @@ class DropUndefinedUseCase(TestCase):
         test_dict = construct_test_dict()
         self.assertEqual(drop_undefined(test_dict)["a"], 5)
 
+
+class DropExceptKeysUseCase(TestCase):
+
+    def test_if_only_defined_keys_persist(self):
+        test_dict = construct_test_dict()
+        new = drop_except_keys(test_dict, {"a", "c"})
+        self.assertEqual(new, {"a": 5, "c": None})
