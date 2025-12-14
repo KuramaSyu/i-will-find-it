@@ -49,3 +49,10 @@ CREATE TABLE IF NOT EXISTS role.member (
     member_id BIGINT REFERENCES users(id),
     PRIMARY KEY(role_id, member_id)
 );
+
+CREATE TABLE IF NOT EXISTS resources (
+    id BIGSERIAL PRIMARY KEY,
+    type TEXT NOT NULL CHECK (type IN ('shelf', 'book', 'chapter', 'note')),
+    parent_id BIGINT REFERENCES resources(id),
+    name TEXT NOT NULL
+);
