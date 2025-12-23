@@ -1,15 +1,15 @@
 import asyncio
 import grpc
 
-from grpc_mod.proto.note_pb2 import (
+from src.grpc_mod.proto.note_pb2 import (
     GetNoteRequest,
     GetSearchNotesRequest,
     Note,
     PostNoteRequest,
 )
-from grpc_mod.proto.note_pb2_grpc import NoteServiceStub
-from grpc_mod.proto.user_pb2 import GetUserRequest, PostUserRequest, User
-from grpc_mod.proto.user_pb2_grpc import UserServiceStub
+from src.grpc_mod.proto.note_pb2_grpc import NoteServiceStub
+from src.grpc_mod.proto.user_pb2 import GetUserRequest, PostUserRequest, User
+from src.grpc_mod.proto.user_pb2_grpc import UserServiceStub
 
 
 async def get_note(stub: NoteServiceStub, note_id: int):

@@ -1,6 +1,6 @@
 from typing import Dict, Optional
-from db.entities import NoteEntity
-from db.repos.note.note import NoteRepoFacadeABC
+from src.db.entities import NoteEntity
+from src.db.repos.note.note import NoteRepoFacadeABC
 
 
 class NoteTestRepo(NoteRepoFacadeABC):

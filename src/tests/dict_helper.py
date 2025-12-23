@@ -3,10 +3,10 @@ from dataclasses import dataclass
 from typing import Any, Dict
 import unittest
 from unittest import TestCase
-from api import UNDEFINED
-from api.undefined import UndefinedNoneOr, UndefinedOr
-from utils.dict_helper import drop_undefined, drop_except_keys
-from utils.convert import asdict
+from src.api import UNDEFINED
+from src.api.undefined import UndefinedNoneOr, UndefinedOr
+from src.utils.dict_helper import drop_undefined, drop_except_keys
+from src.utils.convert import asdict
 
 def construct_test_dict() -> Dict[str, Any]:
     return {

@@ -3,10 +3,10 @@ from datetime import datetime
 from typing import List, Self
 
 from asyncpg import Record
-from ai.embedding_generator import EmbeddingGenerator, EmbeddingGeneratorABC, Models
-from db.database import Database, DatabaseABC
-from db.entities import NoteEntity
-from db import TableABC
+from src.ai.embedding_generator import EmbeddingGenerator, EmbeddingGeneratorABC, Models
+from src.db.database import Database, DatabaseABC
+from src.db.entities import NoteEntity
+from src.db import TableABC
 
 
 class NoteSearchStrategy(ABC):

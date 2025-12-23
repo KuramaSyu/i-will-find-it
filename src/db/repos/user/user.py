@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from db.entities import UserEntity
-from db import Database
+from src.db.entities import UserEntity
+from src.db import Database
 
 
 class UserRepoABC(ABC):

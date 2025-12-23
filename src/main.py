@@ -7,18 +7,18 @@ from typing import Optional, Callable
 import grpc
 from colorama import Fore, Style, init
 
-from utils import logging_provider
-from ai.embedding_generator import EmbeddingGenerator, Models
-from db import table
-from db.repos import NoteRepoFacadeABC, NoteRepoFacade
-from db import Database
-from db.repos.note.embedding import NoteEmbeddingPostgresRepo
-from db.repos.note.permission import NotePermissionPostgresRepo
-from db.repos.user.user import UserRepoABC, UserPostgresRepo
-from db.table import Table, setup_table_logging
-from grpc_mod.proto.user_pb2_grpc import add_UserServiceServicer_to_server
-from grpc_mod import add_NoteServiceServicer_to_server, GrpcNoteService, GrpcUserService
-from db.repos.note.content import NoteContentPostgresRepo
+from src.utils import logging_provider
+from src.ai.embedding_generator import EmbeddingGenerator, Models
+from src.db import table
+from src.db.repos import NoteRepoFacadeABC, NoteRepoFacade
+from src.db import Database
+from src.db.repos.note.embedding import NoteEmbeddingPostgresRepo
+from src.db.repos.note.permission import NotePermissionPostgresRepo
+from src.db.repos.user.user import UserRepoABC, UserPostgresRepo
+from src.db.table import Table, setup_table_logging
+from src.grpc_mod.proto.user_pb2_grpc import add_UserServiceServicer_to_server
+from src.grpc_mod import add_NoteServiceServicer_to_server, GrpcNoteService, GrpcUserService
+from src.db.repos.note.content import NoteContentPostgresRepo
 
 
 

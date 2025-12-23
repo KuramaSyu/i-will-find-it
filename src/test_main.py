@@ -7,7 +7,7 @@ from tests.dict_helper import (
     AsDictDataclassUseCase
 )
 
-from tests.user_repo import postgres_container
+from tests.test_user_repo import postgres_container
 if __name__ == "__main__":
     unittest.main()
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Sequence
 
-from api.undefined import *
+from src.api.undefined import *
 
 
 @dataclass

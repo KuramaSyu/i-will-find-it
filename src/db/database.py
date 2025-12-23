@@ -4,8 +4,8 @@ from typing import Awaitable, Callable, Coroutine, Dict, Optional, List, Any
 import asyncpg
 from asyncpg import Pool, Connection, Record
 
-from api.types import LoggingProvider
-from utils.singleton import SingletonMeta
+from src.api.types import LoggingProvider
+from src.utils.singleton import SingletonMeta
 
 
 def strip_args(*args: Any) -> List[Any]:

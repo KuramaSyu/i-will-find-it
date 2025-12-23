@@ -5,19 +5,19 @@ import typing
 
 import asyncpg
 
-from ai.embedding_generator import EmbeddingGenerator, Models
-from api.types import Pagination
-from db.entities import NoteEntity
-from db import Database
-from db.entities.note.embedding import NoteEmbeddingEntity
-from db.repos.note.content import NoteContentRepo
+from src.ai.embedding_generator import EmbeddingGenerator, Models
+from src.api.types import Pagination
+from src.db.entities import NoteEntity
+from src.db import Database
+from src.db.entities.note.embedding import NoteEmbeddingEntity
+from src.db.repos.note.content import NoteContentRepo
 
-from db.repos.note.permission import NotePermissionRepo
-from db.repos.note.search_strategy import ContextNoteSearchStrategy, FuzzyTitleContentSearchStrategy, NoteSearchStrategy, TitleLexemeNoteSearchStrategy
-from db.table import TableABC
-from api.undefined import UNDEFINED
-from db.entities.note.permission import NotePermissionEntity
-from db.repos.note.embedding import NoteEmbeddingRepo
+from src.db.repos.note.permission import NotePermissionRepo
+from src.db.repos.note.search_strategy import ContextNoteSearchStrategy, FuzzyTitleContentSearchStrategy, NoteSearchStrategy, TitleLexemeNoteSearchStrategy
+from src.db.table import TableABC
+from src.api.undefined import UNDEFINED
+from src.db.entities.note.permission import NotePermissionEntity
+from src.db.repos.note.embedding import NoteEmbeddingRepo
 
 
 class SearchType(Enum):

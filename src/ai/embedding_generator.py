@@ -6,7 +6,7 @@ import numpy as np
 from typing import List, Any, Sequence
 
 from torch import Tensor
-from api import LoggingProvider
+from src.api import LoggingProvider
 
 
 class Models(Enum):

@@ -11,9 +11,9 @@ from pandas import DataFrame
 import asyncpg
 from asyncpg import Record
 
-from api.types import LoggingProvider
-from db.database import Database
-from utils.convert import asdict
+from src.api.types import LoggingProvider
+from src.db.database import Database
+from src.utils.convert import asdict
 
 TReturn = TypeVar('TReturn', List[Record], pd.DataFrame, covariant=True)
 log: Optional[logging.Logger] = None

@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from asyncpg import Record
-from ai.embedding_generator import EmbeddingGeneratorABC
-from db.entities import NoteEmbeddingEntity
-from db.table import TableABC
+from src.ai.embedding_generator import EmbeddingGeneratorABC
+from src.db.entities import NoteEmbeddingEntity
+from src.db.table import TableABC
 
-from utils import asdict
+from src.utils import asdict
 
 class NoteEmbeddingRepo(ABC):
 

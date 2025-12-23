@@ -1,12 +1,12 @@
 from typing import Any, Dict
 from google.protobuf.timestamp_pb2 import Timestamp
 
-from api.undefined import UNDEFINED
-from db.entities.note.metadata import NoteEntity
-from db.repos.note.note import SearchType
-from grpc_mod.proto.note_pb2 import GetSearchNotesRequest, MinimalNote, Note, NoteEmbedding, NotePermission
-from utils import asdict
-from utils.dict_helper import drop_except_keys, drop_undefined
+from src.api.undefined import UNDEFINED
+from src.db.entities.note.metadata import NoteEntity
+from src.db.repos.note.note import SearchType
+from src.grpc_mod.proto.note_pb2 import GetSearchNotesRequest, MinimalNote, Note, NoteEmbedding, NotePermission
+from src.utils import asdict
+from src.utils.dict_helper import drop_except_keys, drop_undefined
 
 
 

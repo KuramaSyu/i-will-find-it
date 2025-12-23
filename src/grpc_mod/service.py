@@ -8,13 +8,13 @@ import grpc
 from grpc.aio import ServicerContext
 import asyncpg
 
-from api import LoggingProvider
-from api.types import Pagination
-from api.undefined import UNDEFINED
-from db.repos import NoteRepoFacadeABC
-from db.entities import NoteEntity
-from db.repos.note.note import SearchType
-from grpc_mod import (
+from src.api import LoggingProvider
+from src.api.types import Pagination
+from src.api.undefined import UNDEFINED
+from src.db.repos import NoteRepoFacadeABC
+from src.db.entities import NoteEntity
+from src.db.repos.note.note import SearchType
+from src.grpc_mod import (
     GetNoteRequest, NoteEmbedding, 
     NotePermission, PostNoteRequest, Note,
     NoteService, NoteServiceServicer,
@@ -22,10 +22,10 @@ from grpc_mod import (
     AlterUserRequest, DeleteUserRequest, 
     DeleteUserResponse, PostUserRequest,
 )
-from grpc_mod.converter import to_grpc_note, to_grpc_user
-from db import UserRepoABC, UserEntity
-from grpc_mod.converter.note_entity_converter import to_grpc_minimal_note, to_search_type
-from grpc_mod.proto.note_pb2 import GetSearchNotesRequest, MinimalNote
+from src.grpc_mod.converter import to_grpc_note, to_grpc_user
+from src.db import UserRepoABC, UserEntity
+from src.grpc_mod.converter.note_entity_converter import to_grpc_minimal_note, to_search_type
+from src.grpc_mod.proto.note_pb2 import GetSearchNotesRequest, MinimalNote
 
 
 class GrpcNoteService(NoteServiceServicer):

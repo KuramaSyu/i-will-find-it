@@ -7,7 +7,7 @@ from asyncpg import Record
 
 from .embedding import NoteEmbeddingEntity
 from .permission import NotePermissionEntity
-from api.undefined import *
+from src.api.undefined import *
 
 
 @dataclass

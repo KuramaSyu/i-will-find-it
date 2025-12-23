@@ -1,6 +1,6 @@
 from dataclasses import fields, is_dataclass, MISSING
 from typing import Any, Dict, Tuple
-from api.undefined import UNDEFINED, UndefinedOr, UndefinedNoneOr
+from src.api.undefined import UNDEFINED, UndefinedOr, UndefinedNoneOr
 
 
 def asdict(obj: Any, *, dict_factory: type = dict) -> Dict[str, Any]:

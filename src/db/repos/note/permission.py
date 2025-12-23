@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from asyncpg import Record
-from db.entities import NotePermissionEntity
-from db.table import TableABC
+from src.db.entities import NotePermissionEntity
+from src.db.table import TableABC
 
-from utils import asdict
+from src.utils import asdict
 
 
 class NotePermissionRepo(ABC):

@@ -1,9 +1,9 @@
 from google.protobuf.timestamp_pb2 import Timestamp
 
-from db.entities.note.metadata import NoteEntity
-from grpc_mod.proto.note_pb2 import Note, NoteEmbedding, NotePermission
-from grpc_mod import User
-from db.entities.user.user import UserEntity
+from src.db.entities.note.metadata import NoteEntity
+from src.grpc_mod.proto.note_pb2 import Note, NoteEmbedding, NotePermission
+from src.grpc_mod import User
+from src.db.entities.user.user import UserEntity
 
 def to_grpc_user(user_entity: UserEntity) -> User:
     """Converts a UserEntity to a gRPC User message."""
