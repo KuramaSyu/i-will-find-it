@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import replace
 from enum import Enum
 from typing import List, Optional, Type
 import typing
@@ -69,7 +70,7 @@ class NoteRepoFacadeABC(ABC):
         self,
         note: NoteEntity,
     ) -> NoteEntity:
-        """updates note
+        """updates note (content only)
         
         Args:
         -----
@@ -178,7 +179,8 @@ class NoteRepoFacade(NoteRepoFacadeABC):
         print(f"Inserted note with ID: {note_id}")
 
         # insert embeddings
-        assert note.embeddings == []
+        assert note.embeddings == [] or note.embeddings is UNDEFINED
+        note.embeddings = []
         query = f"""
         INSERT INTO {self.embedding_table_name}(note_id, model, embedding)
         VALUES ($1, $2, $3)
@@ -190,35 +192,34 @@ class NoteRepoFacade(NoteRepoFacadeABC):
                 note.content
             )
             note.embeddings.append(embedding)
+
         # insert permissions
         query = f"""
         INSERT INTO {self.permission_table_name}(note_id, role_id)
         VALUES ($1, $2)
         """
-        for permission in note.permissions:
-            permission.note_id = note_id
-            await self._db.execute(
-                query,
-                note_id, permission.role_id
-            )
+        if note.permissions != UNDEFINED:
+            for permission in note.permissions:  # type: ignore
+                permission.note_id = note_id
+                await self._db.execute(
+                    query,
+                    note_id, permission.role_id
+                )
         note.note_id = note_id
         return note
     
     async def update(self, note: NoteEntity) -> NoteEntity:
-        return await self._content_repo.update(
-            set=note,
-            where=NoteEntity(
-                note_id=note.note_id,
-                author_id=UNDEFINED,
-                content=UNDEFINED,
-                embeddings=UNDEFINED,
-                permissions=UNDEFINED,
-                title=UNDEFINED,
-                updated_at=UNDEFINED
-            )
+        # update content
+        note_entity = await self._content_repo.update(
+            set=replace(note, embeddings=UNDEFINED, permissions=UNDEFINED, note_id=UNDEFINED),
+            where=NoteEntity(note_id=note.note_id)
         )
-        
-    
+
+        # add removed embeddings and permissions
+        note_entity.embeddings = note.embeddings
+        note_entity.permissions = note.permissions
+        return note_entity
+
     async def delete(self, note):
         raise NotImplementedError("Not implemented yet")
     
