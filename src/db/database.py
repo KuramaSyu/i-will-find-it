@@ -70,6 +70,10 @@ class DatabaseABC(ABC):
         """Initializes the database connection pool."""
         ...
 
+    async def close(self):
+        """Shuts down the connection pool"""
+        ...
+        
     @property
     @abstractmethod
     def pool(self) -> asyncpg.Pool:
@@ -93,21 +97,26 @@ class DatabaseABC(ABC):
     
 class Database(DatabaseABC):
     _instance: Optional["Database"] = None
-    def __init__(self, dsn: str, log: LoggingProvider):
+    def __init__(self, dsn: str, log: LoggingProvider, init_file: str = "src/init.sql"):
         self._pool: Optional[Pool] = None
         self._dsn: str = dsn
         self._instance = self
         self._log = log(__name__, self)
+        self._init_file_path = init_file
     
     async def init_db(self):
         self._pool = await asyncpg.create_pool(dsn=self._dsn)
         self._log.info("Database connected")
         
         content = ""
-        with open("init.sql") as f:
+        with open(self._init_file_path) as f:
             content = f.read()
         await self._pool.execute(content)
         self._log.info("Database initialized with init.sql")
+
+    async def close(self):
+        if self._pool:
+            await self._pool.close()
 
     @property
     def pool(self) -> asyncpg.Pool:
