@@ -17,13 +17,16 @@ def asdict(obj: Any, *, dict_factory: type = dict) -> Dict[str, Any]:
         A dictionary representation of the dataclass, excluding UNDEFINED fields.
     
     Example:
-        >>> @dataclass
-        ... class User:
-        ...     name: str
-        ...     email: UndefinedOr[str] = UNDEFINED
-        >>> user = User(name="Alice")
-        >>> asdict(user)
-        {'name': 'Alice'}  # email is excluded
+    ```py
+    @dataclass
+    class User:
+        name: str
+        email: UndefinedOr[str] = UNDEFINED
+    
+    user = User(name="Alice")
+    asdict(user)
+    {'name': 'Alice'}  # email is excluded
+    ```
     """
     if not is_dataclass(obj):
         raise TypeError("asdict() should be called on dataclass instances")
