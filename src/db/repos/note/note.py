@@ -88,7 +88,7 @@ class NoteRepoFacadeABC(ABC):
     async def delete(
         self,
         note: NoteEntity,
-    ) -> NoteEntity:
+    ) -> Optional[List[NoteEntity]]:
         """delete note
         
         Args:
@@ -105,16 +105,16 @@ class NoteRepoFacadeABC(ABC):
 
 
     @abstractmethod
-    async def select(
+    async def select_by_id(
         self,
-        note: NoteEntity,
+        note_id: int,
     ) -> Optional[NoteEntity]:
         """select a whole note by its ID
         
         Args:
         -----
-        note: `NoteMetadataEntity`
-            the note
+        note_id: `int`
+            the ID of the note
 
             
         Returns:
@@ -198,13 +198,15 @@ class NoteRepoFacade(NoteRepoFacadeABC):
         INSERT INTO {self.permission_table_name}(note_id, role_id)
         VALUES ($1, $2)
         """
-        if note.permissions != UNDEFINED:
-            for permission in note.permissions:  # type: ignore
+        if isinstance(note.permissions, list):
+            for permission in note.permissions:
                 permission.note_id = note_id
                 await self._db.execute(
                     query,
                     note_id, permission.role_id
                 )
+        else:
+            note.permissions = []  # to ensure it's the same value as the SQL return
         note.note_id = note_id
         return note
     
@@ -220,19 +222,18 @@ class NoteRepoFacade(NoteRepoFacadeABC):
         note_entity.permissions = note.permissions
         return note_entity
 
-    async def delete(self, note):
-        raise NotImplementedError("Not implemented yet")
+    async def delete(self, note) -> Optional[List[NoteEntity]]:
+        return await self._content_repo.delete(replace(note, embeddings=UNDEFINED, permissions=UNDEFINED))
     
-    async def select(self, note: NoteEntity) -> Optional[NoteEntity]:
-        assert note.note_id
-        record = await self._content_repo.select_by_id(note.note_id)
+    async def select_by_id(self, note_id: int) -> Optional[NoteEntity]:
+        record = await self._content_repo.select_by_id(note_id)
         if not record:
             return None
         
         # fetch embeddings
         embeddings = await self._embedding_repo.select(
             NoteEmbeddingEntity(
-                note_id=note.note_id,
+                note_id=note_id,
                 model=UNDEFINED,
                 embedding=UNDEFINED,
             )
@@ -242,7 +243,7 @@ class NoteRepoFacade(NoteRepoFacadeABC):
         # fetch permissions
         permissions = await self._permission_repo.select(
             NotePermissionEntity(
-                note_id=note.note_id,
+                note_id=note_id,
                 role_id=UNDEFINED,
             )
         )
