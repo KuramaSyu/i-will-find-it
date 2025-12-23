@@ -126,7 +126,7 @@ class NoteEmbeddingPostgresRepo(NoteEmbeddingRepo):
         embedding = NoteEmbeddingEntity(
             note_id=record[0]["note_id"],
             model=self._embedding_generator.model_name,
-            embedding=embedding.tolist(),
+            embedding=self.embedding_generator.str_vec_to_list(record[0]["embedding"]),
         )
         return embedding
 
