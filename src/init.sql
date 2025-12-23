@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS note.content (
 );
 
 CREATE TABLE IF NOT EXISTS note.embedding (
-    note_id BIGINT REFERENCES note.content(id),
+    note_id BIGINT REFERENCES note.content(id) ON DELETE CASCADE ON UPDATE CASCADE,
     model VARCHAR(128),
     embedding VECTOR(384), -- size of output of text-embedding-3-small model 
     PRIMARY KEY(note_id, model)
