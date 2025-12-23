@@ -3,6 +3,7 @@ from typing import Optional
 
 from src.db.entities import UserEntity
 from src.db import Database
+from src.utils.logging import logging_provider
 
 
 class UserRepoABC(ABC):
@@ -53,9 +54,11 @@ class UserPostgresRepo(UserRepoABC):
         """Update an existing user."""
         if user.id is None:
             raise ValueError("User ID is required for update operation")
-        query = "UPDATE users SET discord_id = $1, avatar_url = $2 WHERE id = $3 RETURNING id"
-        await self.db.fetchrow(query, user.discord_id, user.avatar_url, user.id)
-        return user
+        query = "UPDATE users SET discord_id = $1, avatar_url = $2 WHERE id = $3 RETURNING *"
+        ret = await self.db.fetchrow(query, user.discord_id, user.avatar_url, user.id)
+        if not ret:
+            raise Exception(f"Failed to update user; returned: {ret}")
+        return UserEntity(**ret)
 
     async def upsert(self, user: UserEntity) -> UserEntity:
         """Insert or update a user based on discord_id."""
