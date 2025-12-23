@@ -13,7 +13,7 @@ from asyncpg import Record
 
 from src.api.types import LoggingProvider
 from src.db.database import Database
-from src.utils.convert import asdict
+from src.utils import asdict, drop_undefined
 
 TReturn = TypeVar('TReturn', List[Record], pd.DataFrame, covariant=True)
 log: Optional[logging.Logger] = None
@@ -159,7 +159,7 @@ class TableABC(Protocol, Generic[TReturn]):
     async def update(
         self, 
         set: Dict[str, Any], 
-        where: Dict[str, Any] | pd.DataFrame,
+        where: Dict[str, Any],
         returning: str = "*"
     ) -> Optional[Union[List[Record], Record, str]]:
         """Update existing records in the table.
@@ -168,7 +168,7 @@ class TableABC(Protocol, Generic[TReturn]):
         
         Args:
             set: Dictionary mapping column names to new values.
-            where: Dictionary mapping column names to filter values, or DataFrame
+            where: Dictionary mapping column names to filter values
                 with columns as field names and rows as filter criteria.
                 Only records matching all conditions will be updated.
             returning: Columns to return from updated rows. Defaults to '*'.
@@ -519,13 +519,13 @@ class Table(TableABC):
         )
         if returning:
             sql += f"RETURNING {returning} \n"
-        return_values = await self.db.execute(sql, *values)
+        return_values = await self.db.fetch(sql, *values)
         return return_values   
     
     async def update(
         self, 
         set: Dict[str, Any], 
-        where: Dict[str, Any] | pd.DataFrame,
+        where: Dict[str, Any],
         returning: str = "*"
     ) -> Optional[Union[List[Record], Record, str]]:
         return await self._update(
@@ -534,21 +534,13 @@ class Table(TableABC):
             returning=returning
         )
 
-    @with_log()
-    @formatter
     async def _update(
         self, 
         set: Dict[str, Any], 
-        where: Dict[str, Any] | pd.DataFrame,
+        where: Dict[str, Any],
         returning: str = "*"
     ) -> Optional[List[Record]]:
-        # Convert DataFrame to dict if needed
-        if isinstance(where, pd.DataFrame):
-            if len(where) != 1:
-                raise ValueError("DataFrame must contain exactly one row for update")
-            where = dict(where.iloc[0])
-
-        where = asdict(where)  # removes UNDEFINED values
+        where = drop_undefined(where)  # removes UNDEFINED values
         num_gen = (num for num in range(1,100))
         update_set_query = ", ".join([f'{col_name}=${i}' for i, col_name in zip(num_gen, set.keys())])
         next_ = next(num_gen) -1  # otherwise it would be one to high - python bug?
@@ -560,7 +552,8 @@ class Table(TableABC):
         if returning:
             sql += f"RETURNING {returning} \n"
         values = [*set.values(), *where.values()]
-        return_values = await self.db.execute(sql, *values)
+        return_values = await self.db.fetchrow(sql, *values)
+        self.log.error(f"Update returned: {return_values}")
         return return_values   
 
     async def delete(
