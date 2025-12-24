@@ -3,11 +3,11 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    discord_id BIGINT UNIQUE,
-    avatar TEXT,
-    username TEXT,
+    discord_id BIGINT UNIQUE NOT NULL,
+    avatar TEXT NOT NULL,
+    username TEXT NOT NULL,
     discriminator TEXT,
-    email TEXT
+    email TEXT NOT NULL
 );
 
 CREATE SCHEMA IF NOT EXISTS note;
