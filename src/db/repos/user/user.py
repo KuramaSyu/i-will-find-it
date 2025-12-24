@@ -75,7 +75,7 @@ class UserPostgresRepo(UserRepoABC):
 
     async def select(self, user_id: int) -> Optional[UserEntity]:
         """Select a user by ID."""
-        query = "SELECT id, discord_id, avatar FROM users WHERE id = $1"
+        query = "SELECT id, discord_id, avatar, username, discriminator, email FROM users WHERE id = $1"
         row = await self.db.fetchrow(query, user_id)
         if row:
             return UserEntity(
