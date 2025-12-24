@@ -97,14 +97,21 @@ class DateNoteSearchStrategy(NoteSearchStrategy):
 
 
 class TitleLexemeNoteSearchStrategy(NoteSearchStrategy):
-    """Return notes where the title is matched by lexemes in the query"""
+    """
+    Return notes which match by lexme or similarity in the title and content. 
+    Title is also fuzzy searched
+    """
     
     async def search(self) -> list["NoteEntity"]:
         query = f"""
-        SELECT id, title, author_id, content, updated_at
+        SELECT id, title, author_id, content, updated_at,
+            ts_rank(
+                to_tsvector('english', title),
+                websearch_to_tsquery('english', $1)
+            ) AS fts_rank
         FROM note.content
-        WHERE to_tsvector('english', title) @@ to_tsquery('english', $1)
-        ORDER BY ts_rank(to_tsvector('english', title), to_tsquery('english', $1)) DESC
+        WHERE search_vector @@ websearch_to_tsquery('english', $1)
+        ORDER BY fts_rank DESC
         LIMIT {self.limit}
         OFFSET {self.offset};
         """
