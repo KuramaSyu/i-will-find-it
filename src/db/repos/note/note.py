@@ -14,7 +14,7 @@ from src.db.entities.note.embedding import NoteEmbeddingEntity
 from src.db.repos.note.content import NoteContentRepo
 
 from src.db.repos.note.permission import NotePermissionRepo
-from src.db.repos.note.search_strategy import ContextNoteSearchStrategy, FuzzyTitleContentSearchStrategy, NoteSearchStrategy, TitleLexemeNoteSearchStrategy
+from src.db.repos.note.search_strategy import ContextNoteSearchStrategy, DateNoteSearchStrategy, FuzzyTitleContentSearchStrategy, NoteSearchStrategy, TitleLexemeNoteSearchStrategy
 from src.db.table import TableABC
 from src.api.undefined import UNDEFINED
 from src.db.entities.note.permission import NotePermissionEntity
@@ -266,10 +266,7 @@ class NoteRepoFacade(NoteRepoFacadeABC):
         }
         strategy: NoteSearchStrategy
         if search_type == SearchType.NO_SEARCH:
-            strategy = ContextNoteSearchStrategy(
-                **common_init_parameters, 
-                generator=self._embedding_repo.embedding_generator
-            )
+            strategy = DateNoteSearchStrategy(**common_init_parameters)
         elif search_type == SearchType.FULL_TEXT_TITLE:
             strategy = TitleLexemeNoteSearchStrategy(**common_init_parameters)
         elif search_type == SearchType.FUZZY:
