@@ -23,7 +23,10 @@ async def test_create_note(db: Database, note_repo_facade: NoteRepoFacadeABC, us
     log = logging_provider(__name__)
     user = UserEntity(
         discord_id=123455,
-        avatar_url="test",
+        avatar="test",
+        username="Paul",
+        discriminator="1234",
+        email="paul@example.com"
     )
     user = await user_repo.insert(user)
 
@@ -44,7 +47,7 @@ async def test_update_note(db: Database, note_repo_facade: NoteRepoFacadeABC, us
     """Creates a test user, and creates a note for this user"""
     user = UserEntity(
         discord_id=123455,
-        avatar_url="test",
+        avatar="test",
     )
     user = await user_repo.insert(user)
 
@@ -74,7 +77,7 @@ async def test_create_and_remove_note(
     """Creates a test user, and creates a note for this user, then removes the note"""
     user = UserEntity(
         discord_id=123455,
-        avatar_url="test",
+        avatar="test",
     )
     user = await user_repo.insert(user)
 
@@ -111,7 +114,10 @@ async def test_search_by_context(
     """Creates a test user, and creates multiple notes for this user, then searches by context"""
     user = UserEntity(
         discord_id=123455,
-        avatar_url="test",
+        avatar="test",
+        username="Paul",
+        discriminator="1234",
+        email="paul@example.com"
     )
     user = await user_repo.insert(user)
 
@@ -171,7 +177,10 @@ async def test_search_by_web_lexme_matching(
     """Creates a test user, and creates multiple notes for this user, then searches by fuzzy matching"""
     user = UserEntity(
         discord_id=123455,
-        avatar_url="test",
+        avatar="test",
+        username="Paul",
+        discriminator="1234",
+        email="paul@example.com"
     )
     user = await user_repo.insert(user)
 
@@ -245,7 +254,7 @@ async def test_search_by_similarity(
     """
     user = UserEntity(
         discord_id=123455,
-        avatar_url="test",
+        avatar="test",
     )
     user = await user_repo.insert(user)
 
@@ -295,7 +304,10 @@ async def test_search_no_filter(
     """
     user = UserEntity(
         discord_id=123455,
-        avatar_url="test",
+        avatar="test",
+        username="Paul",
+        discriminator="1234",
+        email="paul@example.com"
     )
     user = await user_repo.insert(user)
 

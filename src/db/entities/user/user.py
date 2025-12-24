@@ -5,5 +5,8 @@ from typing import Optional
 @dataclass
 class UserEntity:
     discord_id: int
-    avatar_url: Optional[str] = None
+    avatar: Optional[str] = None
     id: Optional[int] = None
+    username: Optional[str] = None
+    discriminator: Optional[str] = None
+    email: Optional[str] = None
