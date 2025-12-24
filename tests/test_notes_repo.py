@@ -3,10 +3,11 @@ from datetime import datetime
 from typing import AsyncGenerator, Optional
 import pytest
 from testcontainers.postgres import PostgresContainer
+from src.api.types import Pagination
 from src.api.undefined import UNDEFINED
 from src.db.entities.note.metadata import NoteEntity
 from src.db.repos.note.content import NoteContentPostgresRepo, NoteContentRepo
-from src.db.repos.note.note import NoteRepoFacade, NoteRepoFacadeABC
+from src.db.repos.note.note import NoteRepoFacade, NoteRepoFacadeABC, SearchType
 from src.db.table import Table
 from src.db.entities.user.user import UserEntity
 from src.db.repos.user.user import UserRepoABC
@@ -102,6 +103,74 @@ async def test_create_and_remove_note(
         test_note_select_after_delete = await note_repo_facade.select_by_id(
             note_id=test_note_insert.note_id
         )
+
+async def test_search_by_context(
+    note_repo_facade: NoteRepoFacadeABC, 
+    user_repo: UserRepoABC
+):
+    """Creates a test user, and creates multiple notes for this user, then searches by context"""
+    user = UserEntity(
+        discord_id=123455,
+        avatar_url="test",
+    )
+    user = await user_repo.insert(user)
+
+    notes_contents = [
+        "Python is a nice language which makes programming and life easier.",
+        "Another note discussing gRPC services.",
+        "This note is about database repositories.",
+        "A random note without relevant content.",
+        "Citron is used to emulate Mario Kart 8 or Zelda tears of the kingdom.",
+    ]
+
+    for content in notes_contents:
+        test_note = NoteEntity(
+            title="Test Note", 
+            content=content, 
+            updated_at=datetime.now(), 
+            author_id=user.id
+        )
+        await note_repo_facade.insert(test_note)
+
+    async def search(search_query: str, should_contain: str, negative_search: bool = False) -> bool:
+        """Small helper function to make a positive or negative search"""
+        search_results = await note_repo_facade.search_notes(
+            search_type=SearchType.CONTEXT,
+            query=search_query,
+            pagination=Pagination(limit=10, offset=0)
+        )
+        assert search_results[0].content
+        if negative_search:
+            return should_contain not in search_results[0].content
+        else:
+            return should_contain in search_results[0].content
+
+    # gRPC test search
+    assert await search(
+        search_query="REST alternatives to connect services",
+        should_contain="discussing gRPC"
+    ) == True
+
+    # Python test search
+    assert await search(
+        search_query="simple language",
+        should_contain="Python is a nice language"
+    ) == True
+
+    # Emulator test search should not return the random note
+    assert await search(
+        search_query="play games on Nintendo Switch",
+        should_contain="A random note",
+        negative_search=True
+    ) == True
+
+
+
+
+
+
+
+    
 
 
 
