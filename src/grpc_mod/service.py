@@ -144,7 +144,10 @@ class GrpcUserService(UserServiceServicer):
                 UserEntity(
                     id=None,
                     discord_id=request.discord_id,
-                    avatar_url=request.avatar_url,
+                    avatar=request.avatar,
+                    username=request.username,
+                    discriminator=request.discriminator,
+                    email=request.email,
                 )
             )
             self.log.debug(f"Created user entity: {user_entity}")
