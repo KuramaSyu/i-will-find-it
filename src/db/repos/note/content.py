@@ -118,10 +118,15 @@ class NoteContentPostgresRepo(NoteContentRepo):
         self._table = table
 
     async def insert(self, metadata: NoteEntity) -> NoteEntity:
-        record = await self._table.insert(asdict(metadata))
-        if not record:
+        records = await self._table.insert(
+            asdict(metadata),
+            returning="id, title, content, updated_at, author_id"
+        )
+        if not records:
             raise Exception("Failed to insert metadata")
-        return metadata
+        record = dict(records[0])
+        record['note_id'] = record.pop('id')  # convert SQL id -> note_id for NoteEntity
+        return NoteEntity(**record)
 
     async def update(self, set: NoteEntity, where: NoteEntity) -> NoteEntity:
         where_arg = asdict(where)
@@ -129,7 +134,7 @@ class NoteContentPostgresRepo(NoteContentRepo):
         record = await self._table.update(
             set=asdict(set),
             where=where_arg,
-            returning="*"
+            returning="id, title, content, updated_at, author_id"
         )
         if not record:
             raise Exception(f"Failed to update metadata; returned: {record}")
@@ -152,7 +157,8 @@ class NoteContentPostgresRepo(NoteContentRepo):
         if not conditions:
             raise ValueError(f"At least one field must be set to delete metadata: {metadata}")
         records = await self._table.delete(
-            where=conditions
+            where=conditions,
+            returning="id, title, content, updated_at, author_id"
         )
         if not records:
             raise Exception("Failed to delete metadata")
@@ -169,14 +175,15 @@ class NoteContentPostgresRepo(NoteContentRepo):
     
     async def select(self, metadata: NoteEntity) -> List[NoteEntity]:
         records = await self._table.select(
-            where=asdict(metadata)
+            where=asdict(metadata),
+            select="id, title, content, updated_at, author_id"
         )
         if not records:
             return []
         return [NoteEntity(**record) for record in records]
 
     async def select_by_id(self, note_id: int) -> NoteEntity:
-        record = await self._table.fetch_by_id(note_id)
+        record = await self._table.fetch_by_id(note_id, select="id, title, content, updated_at, author_id")
         if not record:
             raise RuntimeError(f"Note with ID {note_id} not found")
         # convert Record to NoteEntity (id -> note_id)
