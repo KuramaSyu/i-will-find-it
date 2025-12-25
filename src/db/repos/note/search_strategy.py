@@ -17,12 +17,14 @@ class NoteSearchStrategy(ABC):
         db: DatabaseABC,
         query: str,
         limit: int,
-        offset: int
+        offset: int,
+        user_id: int,
     ) -> None:
         self.db = db
         self.query = query
         self.limit = limit
         self.offset = offset
+        self.user_id = user_id
 
 
     def set_query(self, query: str) -> Self:
@@ -86,11 +88,12 @@ class DateNoteSearchStrategy(NoteSearchStrategy):
         query = f"""
         SELECT id, title, author_id, content, updated_at
         FROM note.content
+        WHERE author_id = $1
         ORDER BY updated_at DESC
         LIMIT {self.limit}
         OFFSET {self.offset};
         """
-        records = await self.db.fetch(query)
+        records = await self.db.fetch(query, self.user_id)
         if not records:
             return []
         return [NoteEntity.from_record(record) for record in records]
@@ -110,12 +113,14 @@ class WebNoteSearchStrategy(NoteSearchStrategy):
                 websearch_to_tsquery('english', $1)
             ) AS fts_rank
         FROM note.content
-        WHERE search_vector @@ websearch_to_tsquery('english', $1)
+        WHERE 
+            author_id = $2
+            AND search_vector @@ websearch_to_tsquery('english', $1)
         ORDER BY fts_rank DESC
         LIMIT {self.limit}
         OFFSET {self.offset};
         """
-        records = await self.db.fetch(query, self.query)
+        records = await self.db.fetch(query, self.query, self.user_id)
         if not records:
             raise RuntimeError("Failed to fetch notes by exact title.")
         return [NoteEntity.from_record(record) for record in records]
@@ -128,11 +133,12 @@ class FuzzyTitleContentSearchStrategy(NoteSearchStrategy):
         query = f"""
         SELECT id, title, author_id, content, updated_at
         FROM note.content
+        WHERE author_id = $2
         ORDER BY similarity(title || ' ' || content, $1) DESC
         LIMIT {self.limit}
         OFFSET {self.offset};
         """
-        records = await self.db.fetch(query, self.query)
+        records = await self.db.fetch(query, self.query, self.user_id)
         if not records:
             raise RuntimeError("Failed to fetch notes by fuzzy title/content.")
         return [NoteEntity.from_record(record) for record in records]
@@ -140,8 +146,8 @@ class FuzzyTitleContentSearchStrategy(NoteSearchStrategy):
 
 class ContextNoteSearchStrategy(NoteSearchStrategy):
     """Return notes based on semantic search using embeddings."""
-    def __init__(self, db: DatabaseABC, query: str, limit: int, offset: int, generator: EmbeddingGeneratorABC) -> None:
-        super().__init__(db, query, limit, offset)
+    def __init__(self, db: DatabaseABC, query: str, limit: int, offset: int, user_id: int, generator: EmbeddingGeneratorABC) -> None:
+        super().__init__(db, query, limit, offset, user_id)
         self.generator = generator
 
     async def search(self) -> list["NoteEntity"]:
@@ -152,6 +158,7 @@ class ContextNoteSearchStrategy(NoteSearchStrategy):
         JOIN 
             note.content on note.content.id = note.embedding.note_id 
             AND note.embedding.model = $2
+            AND note.content.author_id = {self.user_id}
         ORDER BY similarity ASC
         LIMIT {self.limit}
         OFFSET {self.offset}
