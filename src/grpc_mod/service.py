@@ -25,7 +25,7 @@ from src.grpc_mod import (
 from src.grpc_mod.converter import to_grpc_note, to_grpc_user
 from src.db import UserRepoABC, UserEntity
 from src.grpc_mod.converter.note_entity_converter import to_grpc_minimal_note, to_search_type
-from src.grpc_mod.proto.note_pb2 import AlterNoteRequest, GetSearchNotesRequest, MinimalNote
+from src.grpc_mod.proto.note_pb2 import AlterNoteRequest, DeleteNoteRequest, GetSearchNotesRequest, MinimalNote
 
 
 class GrpcNoteService(NoteServiceServicer):
@@ -71,7 +71,7 @@ class GrpcNoteService(NoteServiceServicer):
             context.set_details("Internal server error while creating note")
             return Note()
 
-    async def AlterNote(self, request: AlterNoteRequest, context: ServicerContext) -> Note:
+    async def PatchNote(self, request: AlterNoteRequest, context: ServicerContext) -> Note:
         try:
             note_entity = await self.repo.update(
                 NoteEntity(
@@ -90,6 +90,25 @@ class GrpcNoteService(NoteServiceServicer):
             self.log.error(f"Error updating note: {traceback.format_exc()}")
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details("Internal server error while updating note")
+            return Note()
+
+    async def DeleteNote(self, request: DeleteNoteRequest, context: ServicerContext) -> Note:
+        try:
+            deleted_note_entities = await self.repo.delete(
+                request.id,
+                UserContext(user_id=request.author_id)
+            )
+            
+            if deleted_note_entities is None:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details(f"Note not found where user with id {request.author_id} has permissions")
+                return Note()
+            assert len(deleted_note_entities) <= 1
+            return to_grpc_note(deleted_note_entities[0])
+        except Exception:
+            self.log.error(f"Error deleting note: {traceback.format_exc()}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details("Internal server error while deleting note")
             return Note()
         
     async def SearchNotes(
