@@ -73,6 +73,7 @@ async def serve():
             )
         ),
         permission_repo=NotePermissionPostgresRepo(permission_table),
+        logging_provider=logging_provider,
     )
 
     # setup gRPC note service
